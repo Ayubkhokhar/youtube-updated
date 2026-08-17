@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Video Generator — YouTube Automation Tool</title>
+  <meta name="description" content="Generate professional YouTube videos from a single topic using AI. Script, voiceover, stock footage, and subtitles — fully automated.">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo-badge">
+        <span class="badge-pulse"></span>
+        🎬 AI Video Generator
+        <span id="version-badge" style="
+          margin-left:10px;
+          font-size:11px;
+          font-weight:700;
+          background:linear-gradient(135deg,#7c3aed,#2563eb);
+          color:#fff;
+          padding:2px 8px;
+          border-radius:20px;
+          letter-spacing:0.05em;
+          vertical-align:middle;
+        ">v?</span>
+      </div>
+      <h1>YouTube Automation Tool</h1>
+      <p>Turn any topic into a fully edited, ready-to-upload video in minutes</p>
+    </header>
+
+    <!-- API Status Badges -->
+    <div class="config-status">
+      <span class="badge {{ 'badge-ok' if config.groq else 'badge-warn' }}">
+        <span class="badge-dot"></span>
+        Groq {{ 'Connected' if config.groq else 'Not Set' }}
+      </span>
+      <span class="badge {{ 'badge-ok' if config.pixabay else 'badge-warn' }}">
+        <span class="badge-dot"></span>
+        Pixabay {{ 'Connected' if config.pixabay else 'Not Set' }}
+      </span>
+      <span class="badge {{ 'badge-ok' if config.pexels else 'badge-warn' }}">
+        <span class="badge-dot"></span>
+        Pexels {{ 'Connected' if config.pexels else 'Not Set' }}
+      </span>
+    </div>
+
+    <!-- Main Generation Form -->
+    <div class="glass-card generate-form">
+      <form action="/generate" method="POST" enctype="multipart/form-data" id="generate-form">
+        <div class="form-group">
+          <label for="topic">Video Topic</label>
+          <input type="text" id="topic" name="topic"
+                 placeholder="e.g. 10 Mind-Blowing Space Facts That Will Change Your View..."
+                 required class="form-input" autocomplete="off">
+          <span class="key-hint">💡 Be specific — include niche, angle, or target audience for better results</span>
+        </div>
+
+        <div class="form-group">
+          <label for="logo">Channel Logo <span style="color:#8b949e;font-weight:400">(optional)</span></label>
+          <div class="file-input-wrapper">
+            <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp" class="file-input">
+            <label for="logo" class="file-label">📁 Choose Image</label>
+            <span class="file-name" id="file-name">No file selected</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-generate" id="generate-btn">
+          <span id="btn-icon">⚡</span>
+          <span id="btn-text">Generate Video</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="text-center" style="margin-bottom: 36px;">
+      <a href="/settings" class="btn-secondary">⚙️ Settings &amp; API Keys</a>
+    </div>
+
+    <!-- How it works -->
+    <div class="glass-card info-section">
+      <h3>How it works</h3>
+      <div class="steps">
+        <div class="step">
+          <span class="step-icon">1</span>
+          <div>
+            <strong>AI Script</strong>
+            <span>LLaMA 3.3 writes an engaging, viral-style script — calibrated to your exact duration</span>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-icon">2</span>
+          <div>
+            <strong>Parallel Media Fetch</strong>
+            <span>All stock footage and images are downloaded simultaneously from Pixabay &amp; Pexels</span>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-icon">3</span>
+          <div>
+            <strong>Neural Voiceover</strong>
+            <span>Edge-TTS generates a natural, human-sounding voice with word-accurate subtitles</span>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-icon">4</span>
+          <div>
+            <strong>Video Assembly</strong>
+            <span>Ken Burns motion, animated subtitles, background music &amp; logo overlay — fully assembled</span>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-icon">5</span>
+          <div>
+            <strong>Download &amp; Upload</strong>
+            <span>SEO-friendly MP4 ready for YouTube, Shorts, TikTok, or Instagram Reels</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Generations -->
+    <div class="glass-card" id="history-section" style="display:none">
+      <h3 style="margin-bottom:16px">📊 Recent Generations</h3>
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
+
+  <script>
+    // Logo file name display
+    document.getElementById('logo').addEventListener('change', function(e) {
+      const name = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+      document.getElementById('file-name').textContent = name;
+    });
+
+    // Submit animation
+    document.getElementById('generate-form').addEventListener('submit', function() {
+      const btn  = document.getElementById('generate-btn');
+      const icon = document.getElementById('btn-icon');
+      const txt  = document.getElementById('btn-text');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      icon.textContent = '⏳';
+      txt.textContent  = 'Starting generation...';
+    });
+
+    // Load recent generation history
+    async function loadHistory() {
+      try {
+        const res  = await fetch('/api/history');
+        const data = await res.json();
+        if (!data.length) return;
+
+        const section = document.getElementById('history-section');
+        const list    = document.getElementById('history-list');
+        section.style.display = 'block';
+
+        data.forEach(run => {
+          const date = new Date(run.timestamp * 1000);
+          const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+                          ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const mins = Math.floor(run.total_time_seconds / 60);
+          const secs = Math.floor(run.total_time_seconds % 60);
+          const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+          const item = document.createElement('div');
+          item.className = 'history-item';
+          item.innerHTML = `
+            <div class="history-meta">
+              <span class="history-aspect">${run.aspect_ratio || 'landscape'}</span>
+              <span class="history-dur">${run.target_duration || 60}s video</span>
+              <span class="history-scenes">${run.scene_count || '?'} scenes</span>
+            </div>
+            <div class="history-time">⏱ ${timeStr}</div>
+            <div class="history-date">${dateStr}</div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (e) { /* ignore */ }
+    }
+    loadHistory();
+
+    // Show live version badge — confirms which server build is running
+    fetch('/api/version')
+      .then(r => r.json())
+      .then(d => {
+        const el = document.getElementById('version-badge');
+        if (el && d.version) el.textContent = 'v' + d.version;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

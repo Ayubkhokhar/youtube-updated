@@ -1,0 +1,152 @@
+[
+  {
+    "timestamp": 1779377814.086382,
+    "aspect_ratio": "portrait",
+    "target_duration": 59,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 8,
+    "video_clip_count": 8,
+    "total_time_seconds": 1351.30322432518
+  },
+  {
+    "timestamp": 1779389527.9076033,
+    "aspect_ratio": "landscape",
+    "target_duration": 250,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 8,
+    "video_clip_count": 8,
+    "total_time_seconds": 955.2871503829956
+  },
+  {
+    "timestamp": 1779393313.4926589,
+    "aspect_ratio": "landscape",
+    "target_duration": 250,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 18,
+    "video_clip_count": 18,
+    "total_time_seconds": 1507.8371279239655
+  },
+  {
+    "timestamp": 1779437009.118738,
+    "aspect_ratio": "portrait",
+    "target_duration": 45,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 6,
+    "video_clip_count": 6,
+    "total_time_seconds": 1331.5147020816803
+  },
+  {
+    "timestamp": 1781078151.8582757,
+    "aspect_ratio": "landscape",
+    "target_duration": 29,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 4,
+    "total_time_seconds": 1018.1359696388245
+  },
+  {
+    "timestamp": 1781082972.4414325,
+    "aspect_ratio": "landscape",
+    "target_duration": 29,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 4,
+    "total_time_seconds": 1187.3305230140686
+  },
+  {
+    "timestamp": 1781085966.0372493,
+    "aspect_ratio": "landscape",
+    "target_duration": 29,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 5,
+    "video_clip_count": 15,
+    "total_time_seconds": 207.3605580329895
+  },
+  {
+    "timestamp": 1781116584.8871057,
+    "aspect_ratio": "landscape",
+    "target_duration": 29,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 12,
+    "total_time_seconds": 448.3458695411682
+  },
+  {
+    "timestamp": 1781116939.217967,
+    "aspect_ratio": "landscape",
+    "target_duration": 29,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 12,
+    "total_time_seconds": 2992.364846944809
+  },
+  {
+    "timestamp": 1781119818.1751926,
+    "aspect_ratio": "landscape",
+    "target_duration": 56,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 8,
+    "video_clip_count": 24,
+    "total_time_seconds": 1106.602523803711
+  },
+  {
+    "timestamp": 1781122878.2090993,
+    "aspect_ratio": "portrait",
+    "target_duration": 48,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 5,
+    "video_clip_count": 15,
+    "total_time_seconds": 632.4699676036835
+  },
+  {
+    "timestamp": 1786971335.2715995,
+    "aspect_ratio": "portrait",
+    "target_duration": 15,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 0,
+    "total_time_seconds": 635.1487617492676
+  },
+  {
+    "timestamp": 1786972032.6049402,
+    "aspect_ratio": "portrait",
+    "target_duration": 10,
+    "media_preference": "video_first",
+    "enable_zoom": false,
+    "scene_count": 4,
+    "video_clip_count": 0,
+    "total_time_seconds": 589.0815453529358
+  },
+  {
+    "timestamp": 1786972577.66053,
+    "aspect_ratio": "portrait",
+    "target_duration": 30,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 0,
+    "total_time_seconds": 11.565623044967651
+  },
+  {
+    "timestamp": 1786975777.057702,
+    "aspect_ratio": "portrait",
+    "target_duration": 30,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 4,
+    "video_clip_count": 0,
+    "total_time_seconds": 13.468363761901855
+  }
+]

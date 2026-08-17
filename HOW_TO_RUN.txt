@@ -1,0 +1,23 @@
+YouTube Automation App - Instructions
+
+This is a Python/Flask based application for automating YouTube videos.
+
+Prerequisites & Technologies:
+- Python 3.10+
+- FFmpeg (must be installed on your system and added to your PATH environment variable for moviepy)
+- Edge-TTS (Text-to-Speech)
+- Flask (Web Framework)
+- Required API Keys: Groq (for AI Script Generation), Pixabay (for stock images/videos), Pexels (for stock images/videos)
+
+Setup Instructions:
+1. Extract the contents of the zip file to a folder.
+2. Open a terminal or command prompt in the extracted folder.
+3. Install the dependencies using pip:
+   pip install -r requirements.txt
+4. Add your API keys. You can do this in the app's settings menu once it's running, or by manually editing `user_settings.json` (or `.env`).
+5. Start the application by running:
+   python main.py
+   (Alternatively, you can double-click `run_server.bat` on Windows)
+6. Open your browser and navigate to http://127.0.0.1:5000 (or the URL displayed in the terminal).
+
+Note: The `output` folder will store generated videos, and the `temp` folder will hold temporary media files during generation. Make sure you have FFmpeg installed globally, otherwise video compilation will fail!

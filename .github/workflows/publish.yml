@@ -1,0 +1,117 @@
+name: Automated Video Publishing Pipeline
+
+on:
+  schedule:
+    # 2x/day scheduled publishing (14:00 UTC and 22:00 UTC)
+    - cron: '0 14 * * *'
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Custom topic override (leave blank to auto-select from queue)'
+        required: false
+        default: ''
+        type: string
+      duration:
+        description: 'Target duration in seconds'
+        required: false
+        default: '300'
+        type: string
+      privacy:
+        description: 'YouTube upload privacy status'
+        required: false
+        default: 'private'
+        type: choice
+        options:
+          - private
+          - unlisted
+          - public
+      dry_run:
+        description: 'Dry run (simulate without full render or upload)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install system dependencies & fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-liberation fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Video Pipeline & Publish
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          CI: 'true'
+        run: |
+          CMD="python pipeline.py"
+          
+          # Check for topic input vs auto-topic
+          if [ -n "${{ github.event.inputs.topic }}" ]; then
+            CMD="$CMD --topic \"${{ github.event.inputs.topic }}\""
+          else
+            CMD="$CMD --auto-topic"
+          fi
+          
+          # Duration
+          if [ -n "${{ github.event.inputs.duration }}" ]; then
+            CMD="$CMD --duration ${{ github.event.inputs.duration }}"
+          fi
+          
+          # Privacy
+          PRIVACY="${{ github.event.inputs.privacy || 'private' }}"
+          CMD="$CMD --privacy $PRIVACY"
+          
+          # Upload flag (upload unless dry-run is explicitly requested)
+          if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
+            CMD="$CMD --upload --upload-shorts"
+          else
+            CMD="$CMD --dry-run"
+          fi
+          
+          echo "Executing command: $CMD"
+          eval $CMD
+
+      - name: Commit and push updated topic memory & logs
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add data/ generation_history.json HISTORY.md 2>/dev/null || true
+          
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(pipeline): record topic history and run telemetry [skip ci]"
+            git push
+            echo "✅ Successfully synced persistent queue and history back to repository."
+          else
+            echo "ℹ️ No persistent data changes to commit."
+          fi

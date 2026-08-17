@@ -1,0 +1,18 @@
+{
+  "groq_api_key": "",
+  "pixabay_api_key": "",
+  "pexels_api_key": "",
+  "aspect_ratio": "portrait",
+  "target_duration": 30,
+  "usage": {
+    "groq_requests": 14,
+    "pixabay_requests": 96,
+    "pexels_requests": 0,
+    "videos_generated": 14
+  },
+  "voice_name": "en-US-GuyNeural",
+  "bg_music_volume": 0.18,
+  "subtitle_color": "yellow",
+  "media_preference": "video_first",
+  "enable_zoom": true
+}
