@@ -148,5 +148,25 @@
     "scene_count": 4,
     "video_clip_count": 0,
     "total_time_seconds": 13.468363761901855
+  },
+  {
+    "timestamp": 1787035162.7708173,
+    "aspect_ratio": "portrait",
+    "target_duration": 30,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 3,
+    "video_clip_count": 0,
+    "total_time_seconds": 740.9124677181244
+  },
+  {
+    "timestamp": 1787046273.966566,
+    "aspect_ratio": "portrait",
+    "target_duration": 30,
+    "media_preference": "video_first",
+    "enable_zoom": true,
+    "scene_count": 3,
+    "video_clip_count": 9,
+    "total_time_seconds": 1034.3543388843536
   }
 ]

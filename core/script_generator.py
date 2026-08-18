@@ -96,16 +96,36 @@ def generate_script(topic, max_retries=3):
 
             prompt = _build_prompt(target, min_words, target_words, scene_count)
 
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user",   "content": f"Write a YouTube video script about: {topic}"},
-                ],
-                temperature=0.75,
-                max_tokens=6000,
-                response_format={"type": "json_object"},
-            )
+            GROQ_MODELS = [
+                "openai/gpt-oss-120b",
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile",
+                "qwen/qwen3.6-27b",
+                "openai/gpt-oss-20b",
+                "groq/compound",
+            ]
+
+            response = None
+            for model_name in GROQ_MODELS:
+                try:
+                    response = client.chat.completions.create(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": prompt},
+                            {"role": "user",   "content": f"Write a YouTube video script about: {topic}"},
+                        ],
+                        temperature=0.75,
+                        max_tokens=6000,
+                        response_format={"type": "json_object"},
+                    )
+                    break
+                except Exception as me:
+                    if "does not exist" in str(me) or "model_not_found" in str(me):
+                        continue
+                    raise me
+
+            if not response:
+                raise RuntimeError("No available Groq models could generate the script.")
 
             content = response.choices[0].message.content.strip()
 

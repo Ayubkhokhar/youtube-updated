@@ -176,18 +176,36 @@ def refill_topic_queue(batch_size: int = 20, min_threshold: int = 5, force: bool
                 f'  ]\n'
                 f"}}"
             )
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": f"Generate {batch_size} fresh history and science topics."},
-                ],
-                temperature=0.85,
-                response_format={"type": "json_object"},
-            )
-            content = response.choices[0].message.content.strip()
-            data = json.loads(content)
-            new_topics = data.get("topics", [])
+            GROQ_MODELS = [
+                "openai/gpt-oss-120b",
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile",
+                "qwen/qwen3.6-27b",
+                "openai/gpt-oss-20b",
+                "groq/compound",
+            ]
+            response = None
+            for model_name in GROQ_MODELS:
+                try:
+                    response = client.chat.completions.create(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": prompt},
+                            {"role": "user", "content": f"Generate {batch_size} fresh history and science topics."},
+                        ],
+                        temperature=0.85,
+                        response_format={"type": "json_object"},
+                    )
+                    break
+                except Exception as me:
+                    if "does not exist" in str(me) or "model_not_found" in str(me):
+                        continue
+                    raise me
+
+            if response:
+                content = response.choices[0].message.content.strip()
+                data = json.loads(content)
+                new_topics = data.get("topics", [])
         except Exception as e:
             print(f"[topic_selector] Groq brainstorm failed, using fallback bank: {e}")
 

@@ -203,17 +203,36 @@ def generate_metadata(script: dict, topic: str = "", mock: bool = False) -> dict
     try:
         from openai import OpenAI
         client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=api_key)
+        GROQ_MODELS = [
+            "openai/gpt-oss-120b",
+            "llama-3.3-70b-versatile",
+            "llama-3.1-70b-versatile",
+            "qwen/qwen3.6-27b",
+            "openai/gpt-oss-20b",
+            "groq/compound",
+        ]
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Generate YouTube SEO metadata for this script:\n\n{script_repr}"},
-            ],
-            temperature=0.7,
-            max_tokens=2000,
-            response_format={"type": "json_object"},
-        )
+        response = None
+        for model_name in GROQ_MODELS:
+            try:
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"Generate YouTube SEO metadata for this script:\n\n{script_repr}"},
+                    ],
+                    temperature=0.7,
+                    max_tokens=2000,
+                    response_format={"type": "json_object"},
+                )
+                break
+            except Exception as me:
+                if "does not exist" in str(me) or "model_not_found" in str(me):
+                    continue
+                raise me
+
+        if not response:
+            raise RuntimeError("No available Groq model could generate metadata.")
 
         content = response.choices[0].message.content.strip()
         data = json.loads(content)

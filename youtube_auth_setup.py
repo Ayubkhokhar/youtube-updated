@@ -110,6 +110,7 @@ def main():
         port=8080,
         prompt="consent",
         access_type="offline",
+        open_browser=True,
     )
 
     refresh_token = credentials.refresh_token
