@@ -2,6 +2,10 @@
 .env
 .env.*
 !.env.example
+client_secrets.json
+credentials.json
+token.json
+
 
 # Python cache & artifacts
 __pycache__/

@@ -356,6 +356,27 @@ def run_pipeline(
         render_time = time.time() - render_start
         log(f"✅ Video successfully encoded in {render_time:.1f}s: {output_video_path}")
 
+        # Save sidecar metadata JSON alongside video
+        if output_video_path:
+            meta_save = {
+                "title": final_youtube_title,
+                "description": metadata.get("description", ""),
+                "tags": metadata.get("tags", []),
+                "category": metadata.get("category", "Education"),
+                "pattern_used": metadata.get("pattern_used"),
+                "thumbnail_path": thumbnail_path,
+                "video_path": output_video_path,
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            meta_json_path = output_video_path.rsplit(".", 1)[0] + "_metadata.json"
+            try:
+                with open(meta_json_path, "w", encoding="utf-8") as f:
+                    json.dump(meta_save, f, indent=2)
+                with open(os.path.join(config.OUTPUT_DIR, "latest_metadata.json"), "w", encoding="utf-8") as f:
+                    json.dump(meta_save, f, indent=2)
+            except Exception as e:
+                log(f"⚠️ Failed saving sidecar metadata JSON: {e}")
+
     # ── 8. Shorts Extraction (§4d) ──────────────────────────────────────────
     shorts_list = []
     if extract_shorts_enabled:

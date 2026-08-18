@@ -89,6 +89,49 @@ This log is append-only. Read before every session to maintain continuity.
     1. Build `dashboard_writer.py` (generates `status.json` with pipeline health, recent videos, queue status, and CTR trends).
     2. Build static HTML/CSS/JS dashboard (`docs/index.html` or `gh-pages`) to monitor pipeline runs headlessly.
 
+## [2026-08-18] — REAL LIVE PIPELINE EXECUTION TEST (NON-MOCK)
+- **What was done:**
+  - Configured real live `GROQ_API_KEY` in `.env`.
+  - Executed full live pipeline (NON-MOCK, NON-DRY-RUN):
+    - Topic: `The Dancing Plague of 1518: Mass Hysteria in Strasbourg` (auto-selected from queue).
+    - Script Generation: Live Groq API (`openai/gpt-oss-120b` endpoint) generated a 3-scene, 78-word script with dynamic hooks.
+    - SEO Metadata Generation: Generated 60-char title (Pattern `a`: Curiosity Gap), 115-word SEO description with standalone hook, and 18 tags.
+    - Thumbnail Generation: Rendered 1280x720 CTR thumbnail with category badge.
+    - TTS Voiceover: Generated 33.5s of neural audio via Edge-TTS (`en-US-GuyNeural`) with word-level subtitles.
+    - Video Encoding: Successfully composed and rendered master MP4 video (`output/the-dancing-plague-of-1518-detail-nobody-talks-about_3f5057.mp4`).
+    - Shorts Extraction: Extracted 30.0s vertical 9:16 Short (`output/shorts/short_1_dancing-plague-1518_98923.mp4`).
+  - Total Render Duration: 740.9s.
+- **Files generated:**
+  - `output/the-dancing-plague-of-1518-detail-nobody-talks-about_3f5057.mp4` (REAL MP4 VIDEO)
+  - `output/thumb_the-dancing-plague-of-1518-detail-nobody.jpg` (REAL THUMBNAIL)
+  - `output/shorts/short_1_dancing-plague-1518_98923.mp4` (REAL 9:16 SHORT)
+
+## [2026-08-18] — METADATA WIRING ROOT CAUSE & SECOND REAL UPLOAD TEST
+- **Root Cause Analysis:**
+  1. *Metadata Disconnect*: The initial run was split into two commands: `pipeline.py` rendered the video without `--upload`, and then `youtube_uploader.py` was invoked directly via CLI (`py youtube_uploader.py --video ...`) without explicit `--title`, `--desc`, `--tags` arguments. `youtube_uploader.py`'s standalone CLI parsed the raw filename for title and defaulted to a 1-line fallback description and 3 generic tags.
+  2. *Thumbnail Attachment Timing*: Calling `thumbnails().set` immediately after `videos().insert` can encounter eventual consistency delays before YouTube's backend registers the video ID for thumbnail attachment.
+  3. *Windows Temp File Lock*: MoviePy/imageio held an open handle on video clips when `cleanup_temp()` called `shutil.rmtree` on Windows.
+- **Fixes Implemented:**
+  1. `pipeline.py` now writes sidecar JSON metadata (`<video_basename>_metadata.json` and `latest_metadata.json`) containing the complete generated SEO metadata and thumbnail path.
+  2. `youtube_uploader.py` now automatically detects and parses the sidecar metadata JSON file whenever `--title` or `--desc` are omitted, eliminating silent fallbacks.
+  3. `upload_thumbnail` now includes a 3-second initialization delay and a 3-attempt retry loop with backoff.
+  4. `cleanup_temp()` uses `gc.collect()` and `shutil.rmtree(..., ignore_errors=True)` to prevent Windows process file lock exceptions.
+- **Second Real Live Execution Results (Unified Pipeline & Upload):**
+  - **Topic**: `The Voynich Manuscript: The Book Nobody Can Read` (Mysteries & Cryptography)
+  - **Video ID**: `84ezE1lAGZk`
+  - **Live URL**: `https://youtu.be/84ezE1lAGZk`
+  - **Title**: `5 Voynich Manuscript Facts That Sound Fake (But Aren't)` (Pattern `b`: Listicle)
+  - **Description**: Complete 150+ word SEO description with historical context, search intent queries, and channel branding.
+  - **Tags**: 15 targeted tags (`Voynich Manuscript`, `medieval manuscripts`, `cryptography history`, `why is the Voynich Manuscript undecipherable`, etc.)
+  - **Category**: `Education` (ID: 27)
+  - **Privacy**: `private`
+  - **Altered/Synthetic Media Disclosure**: `status.containsSyntheticMedia: true`
+  - **Custom Thumbnail**: `output/thumb_5-voynich-manuscript-facts-that-sound-fa.jpg` attached via `thumbnails().set`.
+  - **Vertical Short**: `output/shorts/short_1_voynich-manuscript-mystery_d2349.mp4` (30.0s).
+
+
+
+
 
 
 - **Any decisions made and why:**

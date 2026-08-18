@@ -99,24 +99,29 @@ def get_youtube_client(client_id: str = None, client_secret: str = None, refresh
     return googleapiclient.discovery.build("youtube", "v3", credentials=creds)
 
 
-def upload_thumbnail(youtube, video_id: str, thumbnail_path: str) -> bool:
-    """Uploads a custom JPEG thumbnail for a video."""
+def upload_thumbnail(youtube, video_id: str, thumbnail_path: str, max_retries: int = 3) -> bool:
+    """Uploads a custom JPEG thumbnail for a video with retries and propagation delay."""
     if not thumbnail_path or not os.path.exists(thumbnail_path):
         print(f"⚠️ Thumbnail not found at {thumbnail_path}, skipping thumbnail upload.")
         return False
 
     print(f"🖼️ Uploading custom thumbnail: {thumbnail_path} ...")
-    try:
-        request = youtube.thumbnails().set(
-            videoId=video_id,
-            media_body=MediaFileUpload(thumbnail_path, mimetype="image/jpeg"),
-        )
-        request.execute()
-        print(f"✅ Custom thumbnail successfully attached to video {video_id}!")
-        return True
-    except Exception as e:
-        print(f"⚠️ Failed to upload thumbnail: {e}")
-        return False
+    time.sleep(3)  # Allow YouTube backend to register video before attaching thumbnail
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            request = youtube.thumbnails().set(
+                videoId=video_id,
+                media_body=MediaFileUpload(thumbnail_path, mimetype="image/jpeg"),
+            )
+            response = request.execute()
+            print(f"✅ Custom thumbnail successfully attached to video {video_id}!")
+            return True
+        except Exception as e:
+            print(f"⚠️ Attempt {attempt}/{max_retries} failed to upload thumbnail: {e}")
+            if attempt < max_retries:
+                time.sleep(3 * attempt)
+    return False
 
 
 def upload_video(
@@ -151,15 +156,18 @@ def upload_video(
     if len(clean_title) > 100:
         clean_title = clean_title[:97] + "..."
 
-    # Sanitize tags
-    clean_tags = [t.strip() for t in (tags or []) if t.strip()][:25]
+    # Ensure tags is a list of strings
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    elif not tags:
+        tags = ["history", "science", "facts"]
 
     # Video resource body
     body = {
         "snippet": {
             "title": clean_title,
             "description": description.strip(),
-            "tags": clean_tags,
+            "tags": tags[:500],
             "categoryId": category_id,
             "defaultLanguage": "en",
             "defaultAudioLanguage": "en",
@@ -172,7 +180,7 @@ def upload_video(
     }
 
     if dry_run:
-        print("\n🟡 [youtube_uploader] DRY RUN MODE — Simulating YouTube Upload:")
+        print("\n🟡 [Dry Run] YouTube Upload Request Body Preview:")
         print(json.dumps(body, indent=2))
         return {
             "status": "dry_run",
@@ -181,7 +189,7 @@ def upload_video(
             "title": clean_title,
             "privacy_status": privacy_status,
             "contains_synthetic_media": contains_synthetic_media,
-            "thumbnail_uploaded": bool(thumbnail_path and os.path.exists(thumbnail_path)),
+            "thumbnail_uploaded": bool(thumbnail_path),
         }
 
     # Initialize client
@@ -260,8 +268,8 @@ def main():
     parser.add_argument("--video", type=str, required=True, help="Path to MP4 video file.")
     parser.add_argument("--title", type=str, default=None, help="Video title.")
     parser.add_argument("--desc", type=str, default="", help="Video description.")
-    parser.add_argument("--tags", type=str, default="history,science,facts", help="Comma-separated tags.")
-    parser.add_argument("--category", type=str, default="Education", help="Category (Education, Science & Technology).")
+    parser.add_argument("--tags", type=str, default=None, help="Comma-separated tags.")
+    parser.add_argument("--category", type=str, default=None, help="Category (Education, Science & Technology).")
     parser.add_argument("--thumbnail", type=str, default=None, help="Path to custom thumbnail JPEG.")
     parser.add_argument("--privacy", type=str, choices=["private", "unlisted", "public"], default="private", help="Privacy setting.")
     parser.add_argument("--no-synthetic-flag", action="store_true", help="Disable synthetic media disclosure.")
@@ -269,16 +277,43 @@ def main():
 
     args = parser.parse_args()
 
-    title = args.title or os.path.splitext(os.path.basename(args.video))[0].replace("-", " ").title()
-    tags = [t.strip() for t in args.tags.split(",") if t.strip()]
+    title = args.title
+    description = args.desc
+    tags = [t.strip() for t in args.tags.split(",")] if args.tags else None
+    category = args.category or "Education"
+    thumbnail_path = args.thumbnail
+
+    # Check for sidecar metadata JSON file if metadata was not explicitly provided on CLI
+    sidecar_json = args.video.rsplit(".", 1)[0] + "_metadata.json"
+    if not os.path.exists(sidecar_json):
+        sidecar_json = os.path.join(os.path.dirname(args.video), "latest_metadata.json")
+
+    if os.path.exists(sidecar_json):
+        try:
+            with open(sidecar_json, "r", encoding="utf-8") as f:
+                meta_data = json.load(f)
+                title = title or meta_data.get("title")
+                description = description or meta_data.get("description")
+                if not tags:
+                    tags = meta_data.get("tags")
+                if not args.category:
+                    category = meta_data.get("category", "Education")
+                if not thumbnail_path:
+                    thumbnail_path = meta_data.get("thumbnail_path")
+        except Exception as e:
+            print(f"⚠️ Warning reading sidecar metadata: {e}")
+
+    title = title or os.path.splitext(os.path.basename(args.video))[0].replace("-", " ").title()
+    description = description or f"Deep dive into {title}. Subscribe for daily history and science facts."
+    tags = tags or ["history", "science", "facts"]
 
     res = upload_video(
         video_path=args.video,
         title=title,
-        description=args.desc or f"Deep dive into {title}. Subscribe for daily history and science facts.",
+        description=description,
         tags=tags,
-        category=args.category,
-        thumbnail_path=args.thumbnail,
+        category=category,
+        thumbnail_path=thumbnail_path,
         privacy_status=args.privacy,
         contains_synthetic_media=not args.no_synthetic_flag,
         dry_run=args.dry_run,

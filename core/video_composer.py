@@ -557,11 +557,9 @@ def _load_background_music(duration):
         return None
 
 
-# ---------------------------------------------------------------------------
-# Temp cleanup
-# ---------------------------------------------------------------------------
-
 def cleanup_temp():
+    import gc
+    gc.collect()
     if os.path.exists(config.TEMP_DIR):
-        shutil.rmtree(config.TEMP_DIR)
+        shutil.rmtree(config.TEMP_DIR, ignore_errors=True)
     os.makedirs(config.TEMP_DIR, exist_ok=True)
