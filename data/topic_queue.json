@@ -1,11 +1,6 @@
 {
   "queue": [
     {
-      "topic": "The Klerksdorp Spheres: 3-Billion-Year-Old Natural Curiosities",
-      "category": "Archaeology",
-      "keywords": "klerksdorp spheres south africa geology out of place artifact"
-    },
-    {
       "topic": "The Wow of the Deep Sea: The Bloop and Mariana Trench Sounds",
       "category": "Unexplained Mysteries",
       "keywords": "bloop ocean acoustics mariana trench underwater sound mystery"
@@ -14,6 +9,71 @@
       "topic": "The Carrington Event of 1859: The Solar Storm That Fried Telegraphs",
       "category": "Space & Astronomy",
       "keywords": "carrington event solar flare geomagnetic storm telegraph history"
+    },
+    {
+      "topic": "The Tunguska Event: The 1908 Siberian Explosion",
+      "category": "Science & Natural Disasters",
+      "keywords": "tunguska explosion siberia asteroid meteor 1908"
+    },
+    {
+      "topic": "The Great Molasses Flood of 1919",
+      "category": "Historical Anomalies",
+      "keywords": "boston molasses flood 1919 disaster history"
+    },
+    {
+      "topic": "How the Ozone Hole Was Discovered and Fixed",
+      "category": "Scientific Discoveries",
+      "keywords": "ozone layer chlorofluorocarbons atmospheric science montreal protocol"
+    },
+    {
+      "topic": "The Bronze Age Collapse: When Civilization Disappeared Overnight",
+      "category": "Ancient History",
+      "keywords": "bronze age collapse sea peoples ancient egypt hittites"
+    },
+    {
+      "topic": "The Mary Celeste: The Ghost Ship Found Floating Perfectly Intact",
+      "category": "Unexplained Mysteries",
+      "keywords": "mary celeste ghost ship abandoned maritime mystery"
+    },
+    {
+      "topic": "The Discovery of Penicillin: The World-Changing Lab Mistake",
+      "category": "Scientific Discoveries",
+      "keywords": "alexander fleming penicillin discovery antibiotics medical science"
+    },
+    {
+      "topic": "The Mystery of Gobekli Tepe: The World's Oldest Temple",
+      "category": "Archaeology",
+      "keywords": "gobekli tepe turkey neolithic archaeology ancient temple"
+    },
+    {
+      "topic": "The Taos Hum: The Low-Frequency Sound Driving People Mad",
+      "category": "Unexplained Mysteries",
+      "keywords": "taos hum acoustic anomaly mystery sound new mexico"
+    },
+    {
+      "topic": "The Library of Alexandria: How Knowledge Was Really Lost",
+      "category": "Ancient History",
+      "keywords": "library alexandria egypt ancient scrolls knowledge destruction"
+    },
+    {
+      "topic": "The Great Smog of London 1952: The Fog That Killed Thousands",
+      "category": "Historical Anomalies",
+      "keywords": "great smog london 1952 environmental disaster clean air"
+    },
+    {
+      "topic": "The Fermi Paradox: Where Is Everybody in the Universe?",
+      "category": "Space & Astronomy",
+      "keywords": "fermi paradox drake equation extraterrestrial life space astronomy"
+    },
+    {
+      "topic": "The Roanoke Colony: What Really Happened to the Lost Settlers?",
+      "category": "Lost Civilizations",
+      "keywords": "roanoke colony croatoan lost settlers north carolina history"
+    },
+    {
+      "topic": "The Poison Squad: The Men Who Ate Poison to Create the FDA",
+      "category": "Historical Anomalies",
+      "keywords": "poison squad harvey wiley fda food safety chemistry history"
     }
   ]
 }
